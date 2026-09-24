@@ -1,16 +1,13 @@
-
 [app]
+
 title = My Kivy App
 package.name = mykivyapp
 package.domain = org.example
+
+version = 1.0
+
 source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv
 requirements = python3,kivy
+
 orientation = portrait
-
-[buildozer]
-log_level = 2
-
-android.api = 35
-android.minapi = 23
-android.archs = arm64-v8a
