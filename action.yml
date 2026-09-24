@@ -88,6 +88,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.work-dir }}
       run: |
+        set -o pipefail
         ${{ inputs.buildozer-cmd }}
 
     - name: Upload APK
