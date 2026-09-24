@@ -10,4 +10,11 @@ source.dir = .
 source.include_exts = py,png,jpg,kv
 requirements = python3,kivy
 
+
+
 orientation = portrait
+
+
+android.api = 34
+android.minapi = 21
+android.ndk = 25b
