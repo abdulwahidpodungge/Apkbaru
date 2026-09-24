@@ -69,14 +69,10 @@ runs:
       run: |
         set -e
 
-        echo "ANDROID_HOME=$ANDROID_HOME"
-
         export ANDROID_SDK_ROOT="$ANDROID_HOME"
 
+        echo "ANDROID_HOME=$ANDROID_HOME"
         echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-
-        echo ""
-        echo "Mencari sdkmanager..."
 
         SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" \
           -type f \
@@ -85,71 +81,62 @@ runs:
           2>/dev/null | head -n 1)
 
         if [ -z "$SDKMANAGER" ]; then
-          echo "ERROR: sdkmanager tidak ditemukan!"
-          find "$ANDROID_HOME" -maxdepth 5 -type f -name sdkmanager -print
+          echo "ERROR: sdkmanager tidak ditemukan"
+          find "$ANDROID_HOME" \
+            -type f \
+            -name sdkmanager \
+            -print
           exit 1
         fi
 
-        echo "sdkmanager ditemukan:"
-        echo "$SDKMANAGER"
+        echo "SDKMANAGER=$SDKMANAGER"
 
         SDKMANAGER_DIR=$(dirname "$SDKMANAGER")
-
-        echo "SDKMANAGER_DIR=$SDKMANAGER_DIR"
 
         echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
 
         export PATH="$SDKMANAGER_DIR:$PATH"
 
-        echo ""
-        echo "Versi sdkmanager:"
         sdkmanager --version
-
-        echo ""
-        echo "Install Android SDK packages..."
 
         sdkmanager \
           "platform-tools" \
           "platforms;android-34" \
           "build-tools;34.0.0"
 
-        echo ""
-        echo "Menerima Android SDK licenses..."
-
         yes | sdkmanager --licenses || true
 
-    - name: Check Android SDK
+    - name: Verify Android SDK
       shell: bash
       run: |
         set -e
 
-        echo "ANDROID_HOME=$ANDROID_HOME"
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+        echo "Checking AIDL..."
+
+        AIDL="$ANDROID_HOME/build-tools/34.0.0/aidl"
+
+        if [ ! -f "$AIDL" ]; then
+          echo "ERROR: AIDL tidak ditemukan!"
+          exit 1
+        fi
+
+        if [ ! -x "$AIDL" ]; then
+          echo "ERROR: AIDL tidak executable!"
+          exit 1
+        fi
+
+        echo "AIDL ditemukan:"
+        echo "$AIDL"
+
+        "$AIDL" 2>&1 || true
 
         echo ""
-        echo "SDK Manager:"
-        find "$ANDROID_HOME/cmdline-tools" \
-          -type f \
-          -name sdkmanager \
-          -print
-
-        echo ""
-        echo "AIDL:"
-        find "$ANDROID_HOME/build-tools/34.0.0" \
-          -type f \
-          -name aidl \
-          -print
-
-        echo ""
-        echo "ADB:"
-        find "$ANDROID_HOME/platform-tools" \
-          -type f \
-          -name adb \
-          -print
+        echo "Android SDK:"
+        ls -la "$ANDROID_HOME"
 
         echo ""
         echo "Build Tools:"
-        ls -la "$ANDROID_HOME/build-tools/34.0.0/"
+        ls -la "$ANDROID_HOME/build-tools/34.0.0"
 
     - name: Install Python dependencies
       shell: bash
@@ -175,11 +162,18 @@ runs:
         java -version
         buildozer --version
 
+    - name: Clean old Buildozer Android SDK
+      shell: bash
+      working-directory: ${{ inputs.work-dir }}
+      run: |
+        rm -rf "$HOME/.buildozer/android/platform/android-sdk"
+
     - name: Build APK
       shell: bash
       working-directory: ${{ inputs.work-dir }}
       run: |
         set -e
+
         buildozer -v android debug
 
     - name: Find APK
