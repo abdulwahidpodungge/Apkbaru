@@ -2,15 +2,18 @@ name: Build Kivy APK
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
 
 jobs:
   build:
+
     runs-on: ubuntu-22.04
 
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -19,4 +22,3 @@ jobs:
         with:
           python-version: '3.11'
           work-dir: '.'
-          buildozer-cmd: 'buildozer -v android debug'
