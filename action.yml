@@ -36,6 +36,18 @@ runs:
         distribution: temurin
         java-version: '17'
 
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android SDK packages
+      shell: bash
+      run: |
+        sdkmanager "platform-tools" \
+          "platforms;android-35" \
+          "build-tools;35.0.0"
+
+        yes | sdkmanager --licenses || true
+
     - name: Install system dependencies
       shell: bash
       run: |
@@ -68,15 +80,11 @@ runs:
           libgdbm-compat-dev \
           uuid-dev
 
-    - name: Upgrade pip tools
+    - name: Install Python dependencies
       shell: bash
       run: |
         python -m pip install --upgrade pip
         python -m pip install setuptools wheel
-
-    - name: Install Buildozer
-      shell: bash
-      run: |
         python -m pip install "Cython==0.29.36"
         python -m pip install buildozer
 
@@ -88,27 +96,22 @@ runs:
           python -m pip install -r requirements.txt
         fi
 
-    - name: Check Buildozer
+    - name: Check Android tools
       shell: bash
-      working-directory: ${{ inputs.work-dir }}
       run: |
-        buildozer --version
-        python --version
-        java -version
+        echo "ANDROID_HOME=$ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+
+        find "$ANDROID_HOME" -name aidl -type f -print
+
+        command -v adb || true
+        command -v aidl || true
 
     - name: Build APK
       shell: bash
       working-directory: ${{ inputs.work-dir }}
       run: |
-        set -e
         buildozer -v android debug
-
-    - name: Find APK
-      shell: bash
-      working-directory: ${{ inputs.work-dir }}
-      run: |
-        echo "APK files:"
-        find bin -type f -name "*.apk" -print
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
