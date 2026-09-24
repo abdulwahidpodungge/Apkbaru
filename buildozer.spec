@@ -12,12 +12,15 @@ source.include_exts = py,png,jpg,jpeg,kv,wav,mp3
 requirements = python3,kivy
 
 orientation = portrait
-
 fullscreen = 0
 
 android.api = 34
 android.minapi = 21
 android.ndk = 25b
+
+android.sdk_path = /usr/local/lib/android/sdk
+
+android.accept_sdk_license = True
 
 [buildozer]
 
