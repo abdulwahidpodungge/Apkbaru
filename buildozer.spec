@@ -18,9 +18,6 @@ android.api = 34
 android.minapi = 21
 android.ndk = 25b
 
-android.sdk_path = /usr/local/lib/android/sdk
-
-android.accept_sdk_license = True
 
 [buildozer]
 
